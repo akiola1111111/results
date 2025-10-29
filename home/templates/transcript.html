@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Include Tailwind CSS from CDN for styling -->
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    /* Custom print styles to hide UI elements and optimize for A4 paper */
+    @media print {
+        @page {
+            size: A4 portrait;
+            margin: 0.5cm;
+        }
+        
+        body {
+            font-family: 'Times New Roman', serif;
+            color: #000;
+            margin: 0;
+            padding: 0;
+            font-size: 10px;
+            line-height: 1.1;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        .no-print { 
+            display: none !important; 
+        }
+        
+        nav {
+            display: none !important;
+        }
+        
+        .transcript-container { 
+            border: 2px solid #000;
+            margin: 0;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            page-break-after: always;
+        }
+        
+        .term-table {
+            font-size: 8px;
+            width: 100%;
+            border-collapse: collapse;
+            margin: 5px 0;
+        }
+        
+        .term-table th, .term-table td {
+            border: 1px solid #000;
+            padding: 2px 3px;
+            text-align: center;
+        }
+        
+        .term-table th {
+            background-color: #f0f0f0;
+        }
+        
+        .summary-card {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 5px;
+            margin: 5px 0;
+        }
+        
+        h1 { font-size: 14px; }
+        h2 { font-size: 12px; }
+        h3 { font-size: 11px; }
+
+        .print-signature-line {
+            border-bottom: 1px solid #000;
+            width: 100px;
+        }
+        
+        .print-flex {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+    }
+    
+    .transcript-container {
+        border: 2px solid #000;
+        padding: 15px;
+        margin: 10px auto;
+        background: white;
+        max-width: 900px;
+    }
+    
+    .term-section {
+        margin: 10px 0;
+        page-break-inside: avoid;
+    }
+</style>
+
+<div class="p-6">
+    <!-- Header Section -->
+    <div class="bg-white rounded-lg shadow-xl p-6 no-print mb-8">
+        <h1 class="text-3xl font-bold mb-2 text-center text-gray-800">
+            Student Transcript
+        </h1>
+        <p class="text-center text-gray-600 mb-4 text-xl">
+            {{ student.user.get_full_name }} - {{ student.current_class.name }}
+        </p>
+        
+        <div class="flex justify-center flex-wrap gap-4">
+            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300">
+                <span class="inline-block mr-2">🖨️</span> Print Transcript
+            </button>
+            <a href="{% url 'class_transcripts' student.current_class.id %}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300">
+                Back to Class Transcripts
+            </a>
+            <a href="{% url 'class_report' student.current_class.id %}" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300">
+                Back to Report Cards
+            </a>
+        </div>
+    </div>
+
+    <!-- Transcript Content -->
+    <div class="transcript-container rounded-xl shadow-lg">
+        <!-- School Header -->
+        <div class="text-center mb-6 border-b-2 pb-4">
+            {% if school_info %}
+            <div class="school-header print-flex flex-col md:flex-row items-center justify-center gap-4">
+                {% if school_info.logo %}
+                    <img src="{{ school_info.logo.url }}" alt="School Logo" class="school-logo w-24 h-24 rounded-full mx-auto shadow-sm">
+                {% endif %}
+                <div class="text-center">
+                    <h1 class="text-3xl font-extrabold text-gray-900">{{ school_info.name }}</h1>
+                    <p class="text-sm text-gray-600">{{ school_info.address }}</p>
+                    <p class="text-sm text-gray-600">Tel: {{ school_info.phone }}</p>
+                    <h2 class="text-2xl font-bold mt-2 text-gray-800">OFFICIAL TRANSCRIPT</h2>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Student Information -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-6 shadow-sm">
+            <h3 class="text-lg font-bold mb-2 text-gray-800">Student Information</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <p class="py-1"><strong>Student Name:</strong> {{ student.user.get_full_name }}</p>
+                    <p class="py-1"><strong>Class:</strong> {{ student.current_class.name }}</p>
+                    <p class="py-1"><strong>Admission No:</strong> {{ student.admission_number }}</p>
+                </div>
+                <div>
+                    <p class="py-1"><strong>Date of Birth:</strong> {{ student.date_of_birth|default:"Not provided" }}</p>
+                    <p class="py-1"><strong>Generation Date:</strong> {% now "F j, Y" %}</p>
+                    <p class="py-1"><strong>School Level:</strong> {{ school_level|title }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Academic Summary -->
+        <div class="bg-blue-50 text-blue-800 rounded-lg p-4 mb-6 shadow-sm border border-blue-200">
+            <h3 class="text-lg font-bold mb-2">Academic Summary</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <p><strong>Overall Average:</strong> {{ transcript_data.overall_summary.overall_average }}%</p>
+                    <p><strong>Best Term:</strong> {{ transcript_data.overall_summary.best_term|default:"N/A" }}</p>
+                </div>
+                <div>
+                    <p><strong>Best Score:</strong> {{ transcript_data.overall_summary.best_score }}%</p>
+                    <p><strong>Terms with Data:</strong> {{ transcript_data.overall_summary.terms_with_data }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terms Breakdown -->
+        {% for term_data in transcript_data.terms %}
+        <div class="term-section">
+            <h3 class="text-xl font-bold mb-2 bg-gray-200 text-gray-800 p-2 rounded-md">
+                {{ term_data.term.name }}
+                {% if term_data.term_average %}
+                - Average: <span class="text-blue-600">{{ term_data.term_average }}%</span>
+                {% endif %}
+            </h3>
+            
+            <div class="overflow-x-auto">
+                <table class="term-table rounded-md">
+                    <thead>
+                        <tr class="bg-gray-300">
+                            <th class="py-2 px-4">Subject</th>
+                            <th class="py-2 px-4">Class Score</th>
+                            <th class="py-2 px-4">Exam Score</th>
+                            <th class="py-2 px-4">Total</th>
+                            <th class="py-2 px-4">Grade</th>
+                            <th class="py-2 px-4">Grade Point</th>
+                            <th class="py-2 px-4">Remark</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for subject_name, subject_data in term_data.subjects.items %}
+                        {% if subject_data %}
+                        <tr class="hover:bg-gray-100">
+                            <td class="text-left px-4">{{ subject_name }}</td>
+                            <td>{{ subject_data.class_score|default:"-" }}</td>
+                            <td>{{ subject_data.exam_score|default:"-" }}</td>
+                            <td><strong>{{ subject_data.total_score|default:"-" }}</strong></td>
+                            <td><strong class="text-blue-600">{{ subject_data.grade|default:"-" }}</strong></td>
+                            <td><strong>{{ subject_data.grade_point|default:"-" }}</strong></td>
+                            <td class="text-left px-4">{{ subject_data.remark|default:"-" }}</td>
+                        </tr>
+                        {% endif %}
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-2 text-gray-500">No data available for this term</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Term Remarks -->
+            {% for remark in all_remarks %}
+            {% if remark.term == term_data.term %}
+            <div class="mt-2 p-2 bg-gray-100 rounded-lg text-sm border-l-4 border-gray-400">
+                <strong>Teacher's Remarks:</strong> 
+                <span class="font-normal text-gray-700">Conduct: {{ remark.conduct }}, Attitude: {{ remark.attitude }}, Interest: {{ remark.interest }}, Attendance: {{ remark.total_attendance }} days</span>
+                <br>
+                <strong class="mt-2 block">Comments:</strong> <span class="font-normal text-gray-700">{{ remark.class_teacher_remarks }}</span>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% empty %}
+        <div class="text-center py-8 text-gray-500">
+            <p>No transcript data available for this student.</p>
+        </div>
+        {% endfor %}
+
+        <!-- Final Summary -->
+        <div class="mt-8 border-t-2 pt-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div class="text-center">
+                    <div class="print-signature-line mb-1 mx-auto"></div>
+                    <p class="text-sm font-bold">Class Teacher's Signature</p>
+                </div>
+                <div class="text-center">
+                    <div class="print-signature-line mb-1 mx-auto"></div>
+                    <p class="text-sm font-bold">Headmaster's Signature</p>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <p class="text-xs text-gray-600">Official Transcript - {{ school_info.name|default:"School" }}</p>
+                <p class="text-xs text-gray-600">Generated on {% now "F j, Y" %}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function optimizePrint() {
+        window.print();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const printButton = document.querySelector('button[onclick="window.print()"]');
+        if (printButton) {
+            printButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                optimizePrint();
+            });
+        }
+    });
+</script>
+{% endblock %}

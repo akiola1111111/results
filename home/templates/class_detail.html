@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Use Tailwind CSS from CDN for styling -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="p-6 md:p-12 min-h-screen bg-gray-100">
+    <div class="max-w-6xl mx-auto">
+        <!-- Main Header -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 text-center">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800">
+                <span class="text-indigo-600">{{ selected_class.name }}</span> Management
+            </h1>
+        </div>
+
+        <!-- Current Term Card -->
+        <div class="bg-indigo-50 border border-indigo-200 p-6 rounded-2xl text-center mb-10 shadow-lg">
+            <p class="text-xl md:text-2xl text-indigo-800 font-semibold">
+                Current Term: <span class="text-indigo-600">{{ current_term.name }}</span>
+            </p>
+        </div>
+
+        <!-- Action Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            
+            <!-- Link: Edit or Delete Scores -->
+            <a href="{% url 'input_class_scores' class_id=selected_class.id %}"
+               class="flex flex-col items-center justify-center p-8 bg-white border border-green-200 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
+                <svg class="h-16 w-16 text-green-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+                <span class="text-xl font-bold text-green-800 text-center">Edit/Delete Scores</span>
+            </a>
+            
+            <!-- Link: View Results Table -->
+            <a href="{% url 'student_results_table' class_id=selected_class.id %}"
+               class="flex flex-col items-center justify-center p-8 bg-white border border-purple-200 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
+                <svg class="h-16 w-16 text-purple-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6m-2 2h4m2 0h4m-2-8h.01M12 21a9 9 0 110-18 9 9 0 010 18z" />
+                </svg>
+                <span class="text-xl font-bold text-purple-800 text-center">View Results Table</span>
+            </a>
+            
+            <!-- Link: Add New Student Scores -->
+            <a href="{% url 'new_student_scores' class_id=selected_class.id %}"
+               class="flex flex-col items-center justify-center p-8 bg-white border border-blue-200 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
+                <svg class="h-16 w-16 text-blue-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                <span class="text-xl font-bold text-blue-800 text-center">Add Student Scores</span>
+            </a>
+            
+            <!-- Link: Generate Class Transcripts -->
+            <a href="{% url 'class_transcripts' selected_class.id %}" 
+               class="flex flex-col items-center justify-center p-8 bg-white border border-sky-200 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
+                <svg class="h-16 w-16 text-sky-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span class="text-xl font-bold text-sky-800 text-center">Generate Transcripts</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

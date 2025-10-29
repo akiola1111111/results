@@ -1,0 +1,568 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Include Tailwind CSS from CDN for styling -->
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    /* Custom print styles to hide UI elements and optimize for A4 paper */
+    @media print {
+        @page {
+            size: A4 portrait;
+            margin: 0.5cm;
+        }
+        
+        body {
+            font-family: 'Times New Roman', serif;
+            color: #000;
+            margin: 0;
+            padding: 0;
+            font-size: 10px;
+            line-height: 1.1;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        .no-print { 
+            display: none !important; 
+        }
+        
+        nav, footer {
+            display: none !important;
+        }
+        
+        .report-card-container { 
+            border: 2px solid #000;
+            margin: 0;
+            padding: 8px;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            page-break-after: always;
+        }
+        
+        .report-table {
+            font-size: 8px;
+            width: 100%;
+            border-collapse: collapse;
+            margin: 5px 0;
+        }
+        
+        .report-table th, .report-table td {
+            border: 1px solid #000;
+            padding: 2px 3px;
+            text-align: center;
+        }
+        
+        .report-table th {
+            background-color: #f0f0f0;
+        }
+        
+        .summary-card {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 5px;
+            margin: 5px 0;
+        }
+        
+        h1 { font-size: 14px; }
+        h2 { font-size: 12px; }
+        h3 { font-size: 11px; }
+
+        .print-signature-line {
+            border-bottom: 1px solid #000;
+            width: 100px;
+        }
+        
+        .print-flex {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .remarks-form {
+            display: none !important;
+        }
+
+        .grade-point-col {
+            display: table-cell !important;
+        }
+        
+        .grading-system-badge {
+            display: inline-block !important;
+            background-color: #f0f0f0;
+            border: 1px solid #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 8px;
+            margin-left: 5px;
+        }
+    }
+    
+    .report-card-container {
+        border: 2px solid #000;
+        padding: 15px;
+        margin: 10px auto;
+        background: white;
+        max-width: 900px;
+    }
+    
+    /* Web view styling */
+    @media (max-width: 768px) {
+        .mobile-container {
+            padding: 0.5rem;
+        }
+        
+        .mobile-card {
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .grade-point-col {
+            display: none;
+        }
+    }
+
+    .remarks-section {
+        background-color: #f7fafc;
+        border-left: 4px solid #4f46e5;
+        padding: 1rem;
+    }
+
+    .summary-remarks-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+
+    @media (max-width: 768px) {
+        .summary-remarks-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Form styling */
+    select, input, textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    select:focus, input:focus, textarea:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+    }
+
+    /* Web-specific styling */
+    .report-card-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+    }
+
+    .school-level-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: bold;
+        display: inline-block;
+        margin-left: 0.5rem;
+    }
+
+    .grading-system-badge {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: bold;
+        display: inline-block;
+        margin-left: 0.5rem;
+    }
+
+    /* Table alignment fixes */
+    .report-table {
+        table-layout: fixed;
+        width: 100%;
+    }
+    
+    .report-table th,
+    .report-table td {
+        word-wrap: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
+        vertical-align: middle;
+    }
+    
+    /* Subject column */
+    .report-table th:nth-child(1),
+    .report-table td:nth-child(1) {
+        width: 20%;
+        text-align: center;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+    
+    /* Data columns */
+    .report-table th:nth-child(2),
+    .report-table td:nth-child(2),
+    .report-table th:nth-child(3),
+    .report-table td:nth-child(3),
+    .report-table th:nth-child(4),
+    .report-table td:nth-child(4),
+    .report-table th:nth-child(5),
+    .report-table td:nth-child(5),
+    .report-table th:nth-child(6),
+    .report-table td:nth-child(6),
+    .report-table th:nth-child(7),
+    .report-table td:nth-child(7) {
+        width: 11.4%;
+        text-align: center;
+    }
+
+    /* Remove any left-alignment classes that might be overriding */
+    .report-table td.text-left {
+        text-align: center !important;
+    }
+
+    /* Ensure consistent padding */
+    .report-table th,
+    .report-table td {
+        padding: 4px 6px;
+    }
+
+    /* Grading system header styling */
+    .grading-header {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 1px solid #bae6fd;
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin: 0.5rem 0;
+    }
+</style>
+
+<div class="mobile-container bg-gray-100 min-h-screen">
+    <!-- Header Section (hidden on print) -->
+    <div class="bg-white rounded-xl shadow-lg p-4 no-print mb-6 text-center">
+        <h1 class="text-2xl font-extrabold text-gray-800">
+            {{ selected_class.name }} - Academic Report Cards
+        </h1>
+        <p class="text-gray-600 text-lg mt-2">
+            {{ current_term.name }} | Total Students: {{ total_students }}
+            <span class="school-level-badge">{{ school_level|title }}</span>
+            <span class="grading-system-badge">
+                Grading: 
+                {% if user_school.gradingconfiguration %}
+                    {{ user_school.gradingconfiguration.class_score_weight|floatformat:0 }}/{{ user_school.gradingconfiguration.exam_score_weight|floatformat:0 }}
+                {% else %}
+                    50/50
+                {% endif %}
+            </span>
+        </p>
+        <div class="mt-4 flex flex-wrap justify-center gap-4">
+            <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg px-6 py-3 transition duration-300">
+                🖨️ Print All Report Cards
+            </button>
+            <a href="{% url 'student_results_table' selected_class.id %}" class="bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg px-6 py-3 transition duration-300">
+                📊 View Results Table
+            </a>
+            <a href="{% url 'class_transcripts' selected_class.id %}" class="bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg px-6 py-3 transition duration-300">
+                📄 View Transcripts
+            </a>
+           
+        </div>
+    </div>
+
+    <!-- Individual Student Reports -->
+    {% for student in results_data %}
+    <div class="report-card-container mobile-card">
+        <!-- School and Student Header -->
+        <div class="text-center mb-4 border-b-2 border-gray-200 pb-4">
+            {% if school_info %}
+            <div class="school-header print-flex flex-col md:flex-row items-center justify-center gap-4">
+                {% if school_info.logo %}
+                    <img src="{{ school_info.logo.url }}" alt="School Logo" class="school-logo w-20 h-20 rounded-full mx-auto">
+                {% endif %}
+                <div class="text-center">
+                    <h1 class="text-2xl font-extrabold text-gray-900">{{ school_info.name }}</h1>
+                    <p class="text-sm text-gray-600">{{ school_info.address }}</p>
+                    <p class="text-sm text-gray-600">Tel: {{ school_info.phone }} | Email: {{ school_info.email }}</p>
+                    <h2 class="text-xl font-bold mt-2 text-gray-800">ACADEMIC REPORT CARD</h2>
+                    <p class="text-sm text-gray-600 mt-1">{{ school_level|title }} - {{ current_term.name }}</p>
+                    
+                    <!-- Grading System Information -->
+                    <div class="grading-header mt-2">
+                        <p class="text-sm font-semibold text-gray-700">
+                            📊 Grading System: 
+                            <span class="text-green-600">
+                                Class Work: 
+                                {% if user_school.gradingconfiguration %}
+                                    {{ user_school.gradingconfiguration.class_score_weight|floatformat:0 }}%
+                                {% else %}
+                                    50%
+                                {% endif %}
+                                | Exam: 
+                                {% if user_school.gradingconfiguration %}
+                                    {{ user_school.gradingconfiguration.exam_score_weight|floatformat:0 }}%
+                                {% else %}
+                                    50%
+                                {% endif %}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Student Information -->
+        <div class="bg-gray-50 rounded-lg p-3 mb-4 shadow-sm">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                <div>
+                    <p class="py-1"><strong>Student Name:</strong> {{ student.name }}</p>
+                    <p class="py-1"><strong>Admission No:</strong> {{ student.admission_number }}</p>
+                    <p class="py-1"><strong>Class:</strong> {{ selected_class.name }}</p>
+                </div>
+                <div>
+                    <p class="py-1"><strong>Overall Position:</strong> {{ student.overall_position }}/{{ total_students }}</p>
+                    <p class="py-1"><strong>Total Score:</strong> {{ student.overall_total_score }}</p>
+                    <p class="py-1"><strong>Average:</strong> {{ student.overall_average }}%</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subjects Table with Dynamic Grading Headers -->
+        <div class="mb-4 overflow-x-auto">
+            <table class="report-table">
+                <thead>
+                    <tr class="bg-gray-300">
+                        <th class="py-2 px-2">Subject</th>
+                        <th class="py-2 px-2">
+                            Class
+                            <br>
+                            <small>(
+                            {% if user_school.gradingconfiguration %}
+                                {{ user_school.gradingconfiguration.class_score_weight|floatformat:0 }}
+                            {% else %}
+                                50
+                            {% endif %}%)
+                            </small>
+                        </th>
+                        <th class="py-2 px-2">
+                            Exam
+                            <br>
+                            <small>(
+                            {% if user_school.gradingconfiguration %}
+                                {{ user_school.gradingconfiguration.exam_score_weight|floatformat:0 }}
+                            {% else %}
+                                50
+                            {% endif %}%)
+                            </small>
+                        </th>
+                        <th class="py-2 px-2">Total</th>
+                        <th class="py-2 px-2">Grade</th>
+                        <th class="py-2 px-2 grade-point-col">Grade Point</th>
+                        <th class="py-2 px-2">Remark</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subject_name, subject_data in student.subject_data.items %}
+                    <tr>
+                        <td>{{ subject_name }}</td>
+                        <td>{{ subject_data.class_score }}</td>
+                        <td>{{ subject_data.exam_score }}</td>
+                        <td><strong>{{ subject_data.total_score }}</strong></td>
+                        <td><strong>{{ subject_data.grade }}</strong></td>
+                        <td class="grade-point-col"><strong>{{ subject_data.grade_point }}</strong></td>
+                        <td>{{ subject_data.remark }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary and Remarks -->
+        <div class="summary-remarks-grid">
+            <!-- Academic Summary -->
+            <div class="summary-card">
+                <h3 class="font-bold mb-2 border-b pb-1">Academic Summary</h3>
+                <div class="space-y-1 text-sm">
+                    <div class="flex justify-between">
+                        <span><strong>Overall Total:</strong></span>
+                        <span>{{ student.overall_total_score }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span><strong>Average Score:</strong></span>
+                        <span>{{ student.overall_average }}%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span><strong>Class Position:</strong></span>
+                        <span>{{ student.overall_position }}/{{ total_students }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span><strong>Overall Grade:</strong></span>
+                        <span class="font-bold">{{ student.overall_grade }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span><strong>Overall Remark:</strong></span>
+                        <span class="font-bold">{{ student.overall_remark }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teacher Remarks -->
+            <div class="remarks-section">
+                <h3 class="font-bold mb-2 border-b pb-1">Teacher's Remarks</h3>
+                
+                <!-- Display for printing - FIXED: Now shows conduct and attitude properly -->
+                <div class="print-view">
+                    {% if student.remarks_instance %}
+                    <div class="space-y-1 text-sm">
+                        <div class="grid grid-cols-2 gap-1">
+                            <div><strong>Conduct:</strong> {{ student.remarks_instance.conduct|default:"Not specified" }}</div>
+                            <div><strong>Interest:</strong> {{ student.remarks_instance.interest|default:"Not specified" }}</div>
+                            <div><strong>Attitude:</strong> {{ student.remarks_instance.attitude|default:"Not specified" }}</div>
+                            <div><strong>Attendance:</strong> {{ student.remarks_instance.total_attendance|default:"0" }} days</div>
+                        </div>
+                        <div class="mt-1">
+                            <strong>Comments:</strong>
+                            <p class="text-xs mt-1">{{ student.remarks_instance.class_teacher_remarks|default:"No comments provided." }}</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="space-y-1 text-sm text-gray-500">
+                        <div class="grid grid-cols-2 gap-1">
+                            <div><strong>Conduct:</strong> Not specified</div>
+                            <div><strong>Interest:</strong> Not specified</div>
+                            <div><strong>Attitude:</strong> Not specified</div>
+                            <div><strong>Attendance:</strong> 0 days</div>
+                        </div>
+                        <div class="mt-1">
+                            <strong>Comments:</strong>
+                            <p class="text-xs mt-1">No comments provided.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Editable form for non-print view -->
+                <div class="remarks-form no-print">
+                    <form method="post" class="space-y-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="student_id" value="{{ student.id }}">
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Conduct</label>
+                                {{ student.remarks_form.conduct }}
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Interest</label>
+                                {{ student.remarks_form.interest }}
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Attitude</label>
+                                {{ student.remarks_form.attitude }}
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Attendance</label>
+                                {{ student.remarks_form.total_attendance }}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Remarks</label>
+                            {{ student.remarks_form.class_teacher_remarks }}
+                        </div>
+                        
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded w-full text-sm transition duration-300">
+                            💾 Save Remarks
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final Summary -->
+        <div class="mt-4 border-t-2 pt-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="text-center">
+                    <div class="print-signature-line mb-1 mx-auto"></div>
+                    <p class="text-sm font-bold">Class Teacher's Signature</p>
+                    <p class="text-xs text-gray-600">
+                        {% if selected_class.teacher %}
+                            {{ selected_class.teacher.user.get_full_name }}
+                        {% else %}
+                            Not Assigned
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="text-center">
+                    <div class="print-signature-line mb-1 mx-auto"></div>
+                    <p class="text-sm font-bold">Headmaster's Signature</p>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <p class="text-xs text-gray-600">Official Report Card - {{ school_info.name }}</p>
+                <p class="text-xs text-gray-600">
+                    Grading System: {{ school_level|title }} | 
+                    Scale: 
+                    {% if user_school.gradingconfiguration %}
+                        {{ user_school.gradingconfiguration.class_score_weight|floatformat:0 }}/{{ user_school.gradingconfiguration.exam_score_weight|floatformat:0 }}
+                    {% else %}
+                        50/50
+                    {% endif %}
+                    | Generated on {% now "F j, Y" %}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-12 bg-white rounded-xl shadow-lg">
+        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-4xl text-gray-400">📝</span>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">No Report Data Available</h3>
+        <p class="text-gray-500 mb-6">No student data found for this class and term.</p>
+        <a href="{% url 'new_student_scores' selected_class.id %}" 
+           class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 inline-block">
+            ➕ Add Student Scores
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    function optimizePrint() {
+        window.print();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const printButton = document.querySelector('button[onclick="window.print()"]');
+        if (printButton) {
+            printButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                optimizePrint();
+            });
+        }
+
+        // Add form submission feedback
+        const forms = document.querySelectorAll('.remarks-form form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const button = this.querySelector('button[type="submit"]');
+                button.innerHTML = '💾 Saving...';
+                button.disabled = true;
+            });
+        });
+    });
+</script>
+{% endblock %}

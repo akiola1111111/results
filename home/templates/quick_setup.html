@@ -1,0 +1,466 @@
+{% extends 'base.html' %}
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+    <div class="max-w-4xl mx-auto px-4">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">🎉 Welcome to {{ school.name }}!</h1>
+            <p class="text-xl text-gray-600">Let's get your school set up in just a few minutes</p>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+            <div class="flex items-center justify-between mb-8">
+                <div class="text-center flex-1">
+                    <div class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span class="text-lg">✓</span>
+                    </div>
+                    <p class="text-sm font-medium text-green-600">School Created</p>
+                </div>
+                <div class="h-1 bg-green-500 flex-1 mx-2"></div>
+                <div class="text-center flex-1">
+                    <div class="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span class="text-lg">2</span>
+                    </div>
+                    <p class="text-sm font-medium text-blue-600">Quick Setup</p>
+                </div>
+                <div class="h-1 bg-gray-300 flex-1 mx-2"></div>
+                <div class="text-center flex-1">
+                    <div class="w-12 h-12 bg-gray-300 text-white rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span class="text-lg">3</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-500">Ready to Use</p>
+                </div>
+            </div>
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Classes Section -->
+                <div class="bg-blue-50 rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4 flex items-center">
+                        <span class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center mr-3">🏫</span>
+                        Step 1: Create Your Classes
+                    </h3>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Class Names *
+                        </label>
+                        {{ form.class_names }}
+                        <p class="text-sm text-gray-500 mt-1">{{ form.class_names.help_text }}</p>
+                        {% if form.class_names.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.class_names.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Subjects Section -->
+                <div class="bg-green-50 rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-green-800 mb-4 flex items-center">
+                        <span class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center mr-3">📚</span>
+                        Step 2: Add Your Subjects
+                    </h3>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Subject Names *
+                        </label>
+                        {{ form.subject_names }}
+                        <p class="text-sm text-gray-500 mt-1">{{ form.subject_names.help_text }}</p>
+                        {% if form.subject_names.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.subject_names.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Grading Configuration Section -->
+                <div class="bg-indigo-50 rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-indigo-800 mb-4 flex items-center">
+                        <span class="w-8 h-8 bg-indigo-500 text-white rounded-full flex items-center justify-center mr-3">⚖️</span>
+                        Step 3: Set Your Grading System
+                    </h3>
+                    
+                    <div class="mb-6">
+                        <p class="text-lg font-semibold text-indigo-700 mb-4 text-center">
+                            How do you want to weight class scores vs exam scores?
+                        </p>
+                        
+                        <!-- Grading Scale Selection -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <!-- 50/50 Option -->
+                            <div class="grading-option cursor-pointer border-2 border-blue-300 rounded-xl p-4 text-center transition-all duration-200 hover:border-blue-500 hover:bg-blue-50" 
+                                 onclick="selectGradingOption(50, 50)">
+                                <div class="text-2xl font-bold text-blue-600 mb-2">50/50</div>
+                                <div class="text-sm text-gray-600">
+                                    <div>Class Work: <strong>50%</strong></div>
+                                    <div>Exam: <strong>50%</strong></div>
+                                </div>
+                                <div class="mt-2 text-xs text-blue-500">Balanced Approach</div>
+                            </div>
+                            
+                            <!-- 30/70 Option -->
+                            <div class="grading-option cursor-pointer border-2 border-green-300 rounded-xl p-4 text-center transition-all duration-200 hover:border-green-500 hover:bg-green-50" 
+                                 onclick="selectGradingOption(30, 70)">
+                                <div class="text-2xl font-bold text-green-600 mb-2">30/70</div>
+                                <div class="text-sm text-gray-600">
+                                    <div>Class Work: <strong>30%</strong></div>
+                                    <div>Exam: <strong>70%</strong></div>
+                                </div>
+                                <div class="mt-2 text-xs text-green-500">Exam Focused</div>
+                            </div>
+                            
+                            <!-- 25/75 Option -->
+                            <div class="grading-option cursor-pointer border-2 border-purple-300 rounded-xl p-4 text-center transition-all duration-200 hover:border-purple-500 hover:bg-purple-50" 
+                                 onclick="selectGradingOption(25, 75)">
+                                <div class="text-2xl font-bold text-purple-600 mb-2">25/75</div>
+                                <div class="text-sm text-gray-600">
+                                    <div>Class Work: <strong>25%</strong></div>
+                                    <div>Exam: <strong>75%</strong></div>
+                                </div>
+                                <div class="mt-2 text-xs text-purple-500">Heavy Exam Focus</div>
+                            </div>
+                        </div>
+
+                        <!-- Custom Grading Option -->
+                        <div class="bg-white rounded-lg p-4 border-2 border-orange-300">
+                            <h4 class="text-lg font-semibold text-orange-700 mb-3 flex items-center">
+                                <span class="mr-2">🎯</span> Custom Grading Scale
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Class Work Weight (%)
+                                    </label>
+                                    {{ form.class_score_weight }}
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Exam Weight (%)
+                                    </label>
+                                    {{ form.exam_score_weight }}
+                                </div>
+                            </div>
+                            {% if form.class_score_weight.errors or form.exam_score_weight.errors %}
+                            <p class="text-red-600 text-sm mt-2">Class and exam weights must add up to 100%</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Current Selection Display -->
+                    <div class="mt-4 p-4 bg-white rounded-lg border border-indigo-200">
+                        <h4 class="font-semibold text-indigo-700 mb-2 text-center">📊 Your Selected Grading Scale:</h4>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div class="text-center p-3 bg-blue-50 rounded-lg">
+                                <span class="font-bold text-blue-700">Class Work</span>
+                                <div class="text-2xl font-bold text-blue-600" id="class-weight-display">50%</div>
+                                <p class="text-xs text-blue-600">of final grade</p>
+                            </div>
+                            <div class="text-center p-3 bg-green-50 rounded-lg">
+                                <span class="font-bold text-green-700">Exam</span>
+                                <div class="text-2xl font-bold text-green-600" id="exam-weight-display">50%</div>
+                                <p class="text-xs text-green-600">of final grade</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Help Text -->
+                    <div class="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <p class="text-sm text-yellow-700">
+                            <strong>💡 How it works:</strong> 
+                            Class work includes all continuous assessments (group work, individual assignments, class tests, projects). 
+                            The exam is the end-of-term examination. Your chosen weights will determine how these are combined for the final grade.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Assessment Section -->
+                <div class="bg-purple-50 rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-purple-800 mb-4 flex items-center">
+                        <span class="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center mr-3">📝</span>
+                        Step 4: Set Up Assessment Types
+                    </h3>
+                    
+                    <!-- Current Assessments -->
+                    <div class="mb-4">
+                        <h4 class="text-lg font-semibold text-purple-700 mb-3">Default Assessments (You can modify these)</h4>
+                        
+                        <!-- Class Assessments -->
+                        <div class="mb-4">
+                            <h5 class="font-medium text-purple-600 mb-2">Class Work Assessments</h5>
+                            <div id="class-assessments" class="space-y-2">
+                                <!-- Assessments will be added here by JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <!-- Exam Assessments -->
+                        <div class="mb-4">
+                            <h5 class="font-medium text-purple-600 mb-2">Exam Assessments</h5>
+                            <div id="exam-assessments" class="space-y-2">
+                                <!-- Assessments will be added here by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add New Assessment -->
+                    <div class="bg-white rounded-lg p-4 border border-purple-200">
+                        <h4 class="text-lg font-semibold text-purple-700 mb-3">Add Custom Assessment (Optional)</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Assessment Name
+                                </label>
+                                <input type="text" id="assessment-name" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                                       placeholder="e.g., Group Work">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Maximum Marks
+                                </label>
+                                <input type="number" id="assessment-marks" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                                       placeholder="e.g., 15" min="1" max="100">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Category
+                                </label>
+                                <select id="assessment-category" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500">
+                                    <option value="class_score">Class Work</option>
+                                    <option value="exam">Exam</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="button" onclick="addAssessment()" 
+                                class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-md transition duration-300">
+                            Add Assessment
+                        </button>
+                    </div>
+
+                    <!-- Hidden fields for assessments -->
+                    <div id="assessment-data"></div>
+                </div>
+
+                <!-- Term Section -->
+                <div class="bg-orange-50 rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-orange-800 mb-4 flex items-center">
+                        <span class="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center mr-3">📅</span>
+                        Step 5: Set Up Current Term
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Term Name *
+                            </label>
+                            {{ form.term_name }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Start Date *
+                            </label>
+                            {{ form.start_date }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                End Date *
+                            </label>
+                            {{ form.end_date }}
+                        </div>
+                    </div>
+                    {% if form.term_name.errors or form.start_date.errors or form.end_date.errors %}
+                    <p class="text-red-600 text-sm mt-2">Please check all term fields</p>
+                    {% endif %}
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center">
+                    <button type="submit" 
+                            class="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg transition duration-300 text-lg">
+                        🚀 Complete Setup & Start Using System
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Help Text -->
+        <div class="text-center text-gray-600">
+            <p class="text-sm">Don't worry! You can always modify these settings later from your dashboard.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+let assessmentCount = 0;
+const assessments = {
+    class_score: [],
+    exam: []
+};
+
+// Select grading option
+function selectGradingOption(classWeight, examWeight) {
+    // Update form fields
+    document.getElementById('id_class_score_weight').value = classWeight;
+    document.getElementById('id_exam_score_weight').value = examWeight;
+    
+    // Update visual display
+    updateWeightDisplays();
+    
+    // Remove active class from all options
+    document.querySelectorAll('.grading-option').forEach(option => {
+        option.classList.remove('border-blue-500', 'border-green-500', 'border-purple-500', 'bg-blue-50', 'bg-green-50', 'bg-purple-50');
+        option.classList.add('border-blue-300', 'border-green-300', 'border-purple-300');
+    });
+    
+    // Add active class to selected option
+    let selectedOption;
+    if (classWeight === 50) {
+        selectedOption = document.querySelector('.grading-option:nth-child(1)');
+        selectedOption.classList.add('border-blue-500', 'bg-blue-50');
+    } else if (classWeight === 30) {
+        selectedOption = document.querySelector('.grading-option:nth-child(2)');
+        selectedOption.classList.add('border-green-500', 'bg-green-50');
+    } else if (classWeight === 25) {
+        selectedOption = document.querySelector('.grading-option:nth-child(3)');
+        selectedOption.classList.add('border-purple-500', 'bg-purple-50');
+    }
+}
+
+// Update weight displays when values change
+function updateWeightDisplays() {
+    const classWeight = document.getElementById('id_class_score_weight').value || 50;
+    const examWeight = document.getElementById('id_exam_score_weight').value || 50;
+    
+    document.getElementById('class-weight-display').textContent = classWeight + '%';
+    document.getElementById('exam-weight-display').textContent = examWeight + '%';
+    
+    // Update custom input fields to match selected option
+    document.getElementById('id_class_score_weight').value = classWeight;
+    document.getElementById('id_exam_score_weight').value = examWeight;
+}
+
+// Add default assessments
+function addDefaultAssessments() {
+    const defaultAssessments = [
+        { name: 'Group Work', marks: 15, category: 'class_score' },
+        { name: 'Individual Work', marks: 15, category: 'class_score' },
+        { name: 'Class Test', marks: 15, category: 'class_score' },
+        { name: 'Project', marks: 15, category: 'class_score' },
+        { name: 'End of Term Exam', marks: 100, category: 'exam' }
+    ];
+
+    defaultAssessments.forEach(assessment => {
+        addAssessmentToUI(assessment.name, assessment.marks, assessment.category);
+    });
+}
+
+function addAssessment() {
+    const name = document.getElementById('assessment-name').value;
+    const marks = document.getElementById('assessment-marks').value;
+    const category = document.getElementById('assessment-category').value;
+
+    if (!name || !marks) {
+        alert('Please fill in both assessment name and marks.');
+        return;
+    }
+
+    addAssessmentToUI(name, marks, category);
+    
+    // Clear the form
+    document.getElementById('assessment-name').value = '';
+    document.getElementById('assessment-marks').value = '';
+}
+
+function addAssessmentToUI(name, marks, category) {
+    assessmentCount++;
+    const assessmentId = `assessment_${assessmentCount}`;
+    
+    // Add to the appropriate category
+    const containerId = category === 'class_score' ? 'class-assessments' : 'exam-assessments';
+    const container = document.getElementById(containerId);
+    
+    const assessmentElement = document.createElement('div');
+    assessmentElement.className = 'flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200';
+    assessmentElement.innerHTML = `
+        <div class="flex items-center">
+            <span class="font-medium text-gray-800">${name}</span>
+            <span class="ml-2 text-sm text-gray-600">(${marks} marks)</span>
+        </div>
+        <button type="button" onclick="removeAssessment('${assessmentId}')" class="text-red-500 hover:text-red-700">
+            Remove
+        </button>
+        <input type="hidden" name="assessment_names" value="${name}">
+        <input type="hidden" name="assessment_weights" value="${marks}">
+        <input type="hidden" name="assessment_categories" value="${category}">
+    `;
+    assessmentElement.id = assessmentId;
+    
+    container.appendChild(assessmentElement);
+    
+    // Store in our tracking object
+    assessments[category].push({ id: assessmentId, name, marks, category });
+}
+
+function removeAssessment(assessmentId) {
+    const element = document.getElementById(assessmentId);
+    if (element) {
+        // Remove from tracking object
+        const category = element.querySelector('input[name="assessment_categories"]').value;
+        assessments[category] = assessments[category].filter(a => a.id !== assessmentId);
+        
+        element.remove();
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Set default grading option (50/50)
+    selectGradingOption(50, 50);
+    
+    // Add default assessments
+    addDefaultAssessments();
+    
+    // Add event listeners to custom weight inputs
+    document.getElementById('id_class_score_weight').addEventListener('input', function() {
+        updateWeightDisplays();
+        // Clear selected option when custom values are used
+        document.querySelectorAll('.grading-option').forEach(option => {
+            option.classList.remove('border-blue-500', 'border-green-500', 'border-purple-500', 'bg-blue-50', 'bg-green-50', 'bg-purple-50');
+        });
+    });
+    
+    document.getElementById('id_exam_score_weight').addEventListener('input', function() {
+        updateWeightDisplays();
+        // Clear selected option when custom values are used
+        document.querySelectorAll('.grading-option').forEach(option => {
+            option.classList.remove('border-blue-500', 'border-green-500', 'border-purple-500', 'bg-blue-50', 'bg-green-50', 'bg-purple-50');
+        });
+    });
+});
+</script>
+
+<style>
+input, textarea, select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.grading-option {
+    transition: all 0.2s ease-in-out;
+}
+
+.grading-option:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

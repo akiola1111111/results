@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Load Tailwind CSS FIRST -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/static/css/styles.css" rel="stylesheet">
+    <title>{% block title %}Results Management System{% endblock %}</title>
+    <style>
+        /* Mobile-first responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+        
+        /* Dropdown menu styles */
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            z-index: 1000;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans flex flex-col min-h-screen">
+
+    <!-- Mobile-optimized navigation -->
+    <nav class="bg-gray-800 p-3 sm:p-4 shadow-lg no-print">
+        <div class="container mx-auto flex justify-between items-center">
+            <a class="text-white text-xl sm:text-2xl font-bold flex items-center" href="{% url 'dashboard' %}">
+                <span class="mr-2">📊</span> RMS
+            </a>
+            
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex space-x-2 items-center">
+                {% if user.is_authenticated %}
+                    <!-- Dashboard -->
+                    <a class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium" href="{% url 'dashboard' %}">
+                        🏠 Dashboard
+                    </a>
+
+                  
+
+                    <!-- Quick Setup -->
+                    <a class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium" href="{% url 'quick_setup' %}">
+                        ⚡ Quick Setup
+                    </a>
+
+                    <!-- User Dropdown -->
+                    <div class="dropdown relative">
+                        <button class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium bg-gray-700 hover:bg-gray-600 flex items-center">
+                            👤 {{ user.username }}
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="dropdown-menu">
+                            <div class="py-1">
+                                {% if user.is_staff %}
+                                <a href="{% url 'admin:index' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">⚙️ Admin Panel</a>
+                                <div class="border-t my-1"></div>
+                                {% endif %}
+                                <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">🚪 Logout</a>
+                            </div>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <!-- Guest Navigation -->
+                    <a class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium" href="{% url 'login' %}">
+                        🔑 Login
+                    </a>
+                    <a class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium" href="{% url 'signup' %}">
+                        📝 Sign Up
+                    </a>
+                    <a class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium" href="{% url 'quick_setup' %}">
+                        ⚡ Quick Setup
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-gray-300 hover:text-white focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="md:hidden hidden mt-3 space-y-2 bg-gray-700 rounded-lg p-3">
+            {% if user.is_authenticated %}
+                <!-- Dashboard -->
+                <a href="{% url 'dashboard' %}" class="block text-gray-300 hover:text-white px-3 py-2 rounded text-sm">🏠 Dashboard</a>
+                
+                <!-- Management Mobile -->
+                <div class="text-white font-medium text-sm mb-1 mt-2">⚙️ Management</div>
+                <a href="{% url 'manage_classes' %}" class="block text-gray-300 hover:text-white px-3 py-2 rounded text-sm bg-gray-600 ml-2">Manage Classes</a>
+                <a href="{% url 'manage_subjects' %}" class="block text-gray-300 hover:text-white px-3 py-2 rounded text-sm bg-gray-600 ml-2">Manage Subjects</a>
+                <a href="{% url 'manage_terms' %}" class="block text-gray-300 hover:text-white px-3 py-2 rounded text-sm bg-gray-600 ml-2">Manage Terms</a>
+                <a href="{% url 'manage_assessments' %}" class="block text-gray-300 hover:text-white px-3 py-2 rounded text-sm bg-gray-600 ml-2">Manage Assessments</a>
+                <a href="{% url 'quick_setup' %}" class="block text-gray-300 hover:text-white px-3 py-2 rounded text-sm bg-gray-600 ml-2">Quick Setup</a>
+                
+                <!-- User Menu Mobile -->
+                <div class="border-t border-gray-600 my-2"></div>
+                {% if user.is_staff %}
+                <a href="{% url 'admin:index' %}" class="block text-gray-300 hover:text-white px-3 py-2 rounded text-sm">⚙️ Admin Panel</a>
+                {% endif %}
+                <a href="{% url 'logout' %}" class="block text-red-400 hover:text-red-300 px-3 py-2 rounded text-sm">🚪 Logout</a>
+            {% else %}
+                <!-- Guest Mobile Navigation -->
+                <a href="{% url 'login' %}" class="block text-gray-300 hover:text-white px-3 py-2 rounded text-sm bg-gray-600">🔑 Login</a>
+                <a href="{% url 'signup' %}" class="block text-gray-300 hover:text-white px-3 py-2 rounded text-sm bg-gray-600">📝 Sign Up</a>
+                <a href="{% url 'quick_setup' %}" class="block text-gray-300 hover:text-white px-3 py-2 rounded text-sm bg-blue-600">⚡ Quick Setup</a>
+            {% endif %}
+        </div>
+    </nav>
+    
+    <main class="container mx-auto mt-2 sm:mt-4 px-3 sm:px-4 flex-grow">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="{% if message.tags == 'success' %}bg-green-100 border-green-400 text-green-700{% elif message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %} border px-3 py-2 sm:px-4 sm:py-3 rounded relative mb-3 sm:mb-4 text-sm sm:text-base" role="alert">
+                    <span class="block sm:inline">{{ message }}</span>
+                    <button class="absolute top-0 right-0 px-2 py-1" onclick="this.parentElement.style.display='none'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 text-white p-3 sm:p-4 mt-6 sm:mt-8 no-print">
+        <div class="container mx-auto text-center">
+            <p class="text-sm sm:text-base">&copy; 2025 Results Management System. All rights reserved.</p>
+            <p class="text-xs sm:text-sm mt-1">Contact: 0537693471</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('mobile-menu');
+            const button = document.getElementById('mobile-menu-button');
+            if (!menu.contains(event.target) && !button.contains(event.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Transcript - {{ student.name }}</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 1cm;
+        }
+        
+        body {
+            font-family: 'Times New Roman', serif;
+            color: #000;
+            margin: 0;
+            padding: 0;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+        
+        .school-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .school-address {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .document-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .student-info {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .transcript-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 10px;
+        }
+        
+        .transcript-table th,
+        .transcript-table td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            text-align: center;
+        }
+        
+        .transcript-table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        
+        .transcript-table .subject-col {
+            text-align: left;
+            width: 25%;
+        }
+        
+        .summary-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #000;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .signature-section {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .signature-line {
+            border-bottom: 1px solid #000;
+            width: 200px;
+            margin: 5px 0;
+        }
+        
+        .term-section {
+            margin: 20px 0;
+            page-break-inside: avoid;
+        }
+        
+        .term-title {
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #e0e0e0;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        {% if school_info %}
+            <div class="school-name">{{ school_info.name }}</div>
+            <div class="school-address">{{ school_info.address }}</div>
+            <div class="school-address">Tel: {{ school_info.phone }} | Email: {{ school_info.email }}</div>
+        {% endif %}
+        <div class="document-title">ACADEMIC TRANSCRIPT</div>
+    </div>
+
+    <div class="student-info">
+        <div class="info-grid">
+            <div>
+                <strong>Student Name:</strong> {{ student.name }}
+            </div>
+            <div>
+                <strong>Admission Number:</strong> {{ student.admission_number }}
+            </div>
+            <div>
+                <strong>Class:</strong> {{ student.current_class.name }}
+            </div>
+            <div>
+                <strong>Academic Year:</strong> {{ academic_year }}
+            </div>
+        </div>
+    </div>
+
+    {% if transcript_data %}
+        {% for term_data in transcript_data %}
+            <div class="term-section">
+                <div class="term-title">{{ term_data.term.name }} - Academic Performance</div>
+                
+                <table class="transcript-table">
+                    <thead>
+                        <tr>
+                            <th class="subject-col">Subject</th>
+                            <th>Class Work</th>
+                            <th>Exam</th>
+                            <th>Total</th>
+                            <th>Grade</th>
+                            <th>Points</th>
+                            <th>Position</th>
+                            <th>Remark</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for subject in term_data.subjects %}
+                        <tr>
+                            <td class="subject-col">{{ subject.name }}</td>
+                            <td>{{ subject.class_score|default:"-" }}</td>
+                            <td>{{ subject.exam_score|default:"-" }}</td>
+                            <td><strong>{{ subject.total_score|default:"-" }}</strong></td>
+                            <td><strong>{{ subject.grade|default:"-" }}</strong></td>
+                            <td>{{ subject.grade_point|default:"-" }}</td>
+                            <td>{{ subject.position|default:"-" }}</td>
+                            <td>{{ subject.remark|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                {% if term_data.summary %}
+                <div class="summary-section">
+                    <div class="summary-grid">
+                        <div>
+                            <strong>Term Summary:</strong>
+                            <div>Total Score: {{ term_data.summary.total_score }}</div>
+                            <div>Average: {{ term_data.summary.average }}%</div>
+                            <div>Overall Grade: {{ term_data.summary.overall_grade }}</div>
+                        </div>
+                        <div>
+                            <strong>Class Performance:</strong>
+                            <div>Position: {{ term_data.summary.position }}</div>
+                            <div>Class Size: {{ term_data.summary.class_size }}</div>
+                            <div>Attendance: {{ term_data.summary.attendance }} days</div>
+                        </div>
+                    </div>
+                    {% if term_data.summary.teacher_remarks %}
+                    <div style="margin-top: 10px;">
+                        <strong>Teacher's Remarks:</strong> {{ term_data.summary.teacher_remarks }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-data">
+            No transcript data available for this student.
+        </div>
+    {% endif %}
+
+    {% if overall_summary %}
+    <div class="summary-section">
+        <div class="term-title">OVERALL ACADEMIC SUMMARY</div>
+        <div class="summary-grid">
+            <div>
+                <strong>Cumulative Performance:</strong>
+                <div>Total Average: {{ overall_summary.cumulative_average }}%</div>
+                <div>Overall Grade: {{ overall_summary.overall_grade }}</div>
+                <div>Total Terms: {{ overall_summary.terms_count }}</div>
+            </div>
+            <div>
+                <strong>Academic Standing:</strong>
+                <div>Best Term: {{ overall_summary.best_term }}</div>
+                <div>Consistency: {{ overall_summary.consistency }}</div>
+                <div>Status: {{ overall_summary.status }}</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="signature-section">
+        <div>
+            <div class="signature-line"></div>
+            <div>Class Teacher's Signature</div>
+            <div>Date: {% now "F j, Y" %}</div>
+        </div>
+        <div>
+            <div class="signature-line"></div>
+            <div>Head Teacher's Signature</div>
+            <div>Date: {% now "F j, Y" %}</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Official Academic Transcript - {{ school_info.name }}<br>
+        Generated on {% now "F j, Y \a\t g:i A" %}
+    </div>
+</body>
+</html>

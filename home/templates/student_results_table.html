@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Include Tailwind CSS from CDN for styling -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="p-6 md:p-12 min-h-screen bg-gray-100">
+    <div class="max-w-7xl mx-auto">
+        <!-- Main Header -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 text-center">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800">
+                Results for <span class="text-indigo-600">{{ selected_class.name }}</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-600 mt-2">
+                Term: <span class="font-semibold">{{ current_term.name }}</span> | 
+                Level: <span class="font-semibold">{{ school_level|title }}</span> |
+                Grading: <span class="font-semibold text-green-600">{{ user_school.gradingconfiguration.class_score_weight }}/{{ user_school.gradingconfiguration.exam_score_weight }}</span>
+            </p>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden p-4 md:p-6">
+            <div class="overflow-x-auto table-container">
+                <table class="min-w-full bg-white border border-gray-200">
+                    <thead class="bg-gray-800 text-white">
+                        <tr>
+                            <th rowspan="2" class="py-4 px-4 text-left font-semibold align-middle whitespace-nowrap border-r border-gray-600">Name</th>
+                            {% for subject in subjects %}
+                                <th colspan="6" class="py-4 px-4 text-center font-semibold border-l border-r border-gray-600">
+                                    {{ subject.name }}
+                                </th>
+                            {% endfor %}
+                            <th rowspan="2" class="py-4 px-4 text-center font-semibold border-l border-gray-600 align-middle whitespace-nowrap">Overall Total</th>
+                            <th rowspan="2" class="py-4 px-4 text-center font-semibold border-l border-gray-600 align-middle whitespace-nowrap">Position</th>
+                        </tr>
+                        <tr>
+                            {% for subject in subjects %}
+                                <th class="py-3 px-3 text-center text-xs font-medium border-l border-gray-600">Class ({{ user_school.gradingconfiguration.class_score_weight|floatformat:0 }}%)</th>
+                                <th class="py-3 px-3 text-center text-xs font-medium border-l border-gray-600">Exam ({{ user_school.gradingconfiguration.exam_score_weight|floatformat:0 }}%)</th>
+                                <th class="py-3 px-3 text-center text-xs font-medium border-l border-gray-600">Total (100%)</th>
+                                <th class="py-3 px-3 text-center text-xs font-medium border-l border-gray-600">Grade</th>
+                                <th class="py-3 px-3 text-center text-xs font-medium border-l border-gray-600">Grade Point</th>
+                                <th class="py-3 px-3 text-center text-xs font-medium border-l border-gray-600">Position</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-700 divide-y divide-gray-200">
+                        {% for student in results_data %}
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="py-3 px-4 whitespace-nowrap font-medium">{{ student.name }}</td>
+                                {% for subject in subjects %}
+                                    {% for subject_name, subject_data in student.subject_data.items %}
+                                        {% if subject_name == subject.name %}
+                                        <td class="py-3 px-3 text-center border-l border-gray-200">{{ subject_data.class_score }}</td>
+                                        <td class="py-3 px-3 text-center border-l border-gray-200">{{ subject_data.exam_score }}</td>
+                                        <td class="py-3 px-3 text-center border-l border-gray-200 font-bold">{{ subject_data.total_score }}</td>
+                                        <td class="py-3 px-3 text-center border-l border-gray-200 font-bold text-blue-600">{{ subject_data.grade }}</td>
+                                        <td class="py-3 px-3 text-center border-l border-gray-200">{{ subject_data.grade_point }}</td>
+                                        <td class="py-3 px-3 text-center border-l border-gray-200">{{ subject_data.position }}</td>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                                <td class="py-3 px-4 text-center font-bold border-l border-gray-200">{{ student.overall_total_score }}</td>
+                                <td class="py-3 px-4 text-center font-bold border-l border-gray-200">{{ student.overall_position }}</td>
+                            </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{{ subjects|length|add:4 }}" class="py-8 text-center text-gray-500">
+                                No results available for this class.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="mt-8 text-center no-print flex flex-wrap justify-center items-center gap-4">
+            <a href="{% url 'new_student_scores' selected_class.id %}" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+                <span class="inline-block mr-2">➕</span> Add New Student
+            </a>
+            <a href="{% url 'input_class_scores' selected_class.id %}" class="inline-block bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+                <span class="inline-block mr-2">✏️</span> Update Scores
+            </a>
+            <a href="{% url 'class_report' selected_class.id %}" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+                <span class="inline-block mr-2">📄</span> Generate Report Cards
+            </a>
+            <a href="{% url 'class_transcripts' selected_class.id %}" class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+                <span class="inline-block mr-2">📊</span> View Transcripts
+            </a>
+           
+            <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                <span class="inline-block mr-2">🖨️</span> Print Results
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
